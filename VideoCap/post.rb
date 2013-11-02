@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'httpclient'
 
-host = `cat upload`
+host = `cat upload`.split("\n")[0]
 Urlbase = "http://" + host + "/"
 QueueFile = "queue.txt"
 
@@ -14,12 +14,13 @@ Settings = {
 }
 
 # parse the settings file in the server.
-c.get_content(Urlbase + "html/fujilog/settings.txt").split("\n").each {|i|
-	entry = i.split(/\s+/)
-	if 2 <= entry.size
-		Settings[entry[0]] = entry[1]
-	end
-}
+# temporarily disabled because it tend to fail so often
+#c.get_content(Urlbase + "html/fujilog/settings.txt").split("\n").each {|i|
+#	entry = i.split(/\s+/)
+#	if 2 <= entry.size
+#		Settings[entry[0]] = entry[1]
+#	end
+#}
 
 # print Settings
 #Settings.each{|key,value|
@@ -35,11 +36,19 @@ def upload(c, file, queue_fail)
 
 	# upload and print result
 	open(file) do |fl|
+#		print "Posting: " + Urlbase + Settings["uploader"]
 		postdata = { "fl" => fl, "dir" => dir }
-		resultString = c.post_content(Urlbase + Settings["uploader"], postdata,
-			"content-type" => "multipart/form-data, boundary=#{Boundary}")
-		puts resultString
-		if resultString.split("\n")[0] != "succeeded"
+		begin
+			resultString = c.post_content(Urlbase + Settings["uploader"], postdata,
+				"content-type" => "multipart/form-data, boundary=#{Boundary}")
+			print "Server response: '" + resultString + "'\n"
+			succeeded = resultString.split("\n")[0] == "succeeded"
+		rescue
+			print "Exception occurred in POST\n"
+			succeeded = false
+		end
+
+		if not succeeded
 			if queue_fail
 				open(QueueFile, mode_enc="a") do |fp|
 					fp.write(file + "\n")
@@ -47,6 +56,7 @@ def upload(c, file, queue_fail)
 				end
 			end
 		else
+			File.delete(file)
 			ret = true
 		end
 	end
@@ -66,4 +76,10 @@ if upload(c, ARGV[0], true)
 
 		File.delete(QueueFile)
 	end
+
+#	Dir['**/*'].each {|f|
+#		if File.directory?(f)
+#		end
+#	}
 end
+
