@@ -15,11 +15,11 @@ int process()
 	if (!cap.isOpened()) {
 		return 1;
 	}
-	cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240.0);
-	cap.set(CV_CAP_PROP_FRAME_WIDTH, 320.0);
+	cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480.0);
+	cap.set(CV_CAP_PROP_FRAME_WIDTH, 640.0);
 
 	Mat frame;
-	cv::namedWindow(WINDOW_NAME, WINDOW_NORMAL);
+	cv::namedWindow(WINDOW_NAME, WINDOW_AUTOSIZE);
 	while (true) {
 		cap >> frame;
 		if (frame.empty())
@@ -32,6 +32,7 @@ int process()
 
 		switch(key) {
 			case 27:
+				cv::imwrite("test.jpg", frame, vector<int>());
 				return 0;
 			default:
 				break;
