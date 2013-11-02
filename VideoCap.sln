@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoCap", "VideoCap\VideoCap.vcproj", "{C4C96CAE-F402-47C2-BB05-D750CDF43DDB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4C96CAE-F402-47C2-BB05-D750CDF43DDB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C4C96CAE-F402-47C2-BB05-D750CDF43DDB}.Debug|Win32.Build.0 = Debug|Win32
+		{C4C96CAE-F402-47C2-BB05-D750CDF43DDB}.Release|Win32.ActiveCfg = Release|Win32
+		{C4C96CAE-F402-47C2-BB05-D750CDF43DDB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
