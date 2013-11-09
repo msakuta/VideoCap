@@ -1,17 +1,29 @@
 require 'rubygems'
 require 'httpclient'
 
-host = `cat upload`.split("\n")[0]
-Urlbase = "http://" + host + "/"
-QueueFile = "queue.txt"
-
-Boundary = "123456"
-c = HTTPClient.new
-
 # default values
 Settings = {
 	"uploader" => "/html/fujilog/upload.php"
 }
+
+# Parse the settings file in the local machine.
+# Assumed file format is the same as the server settings.txt,
+# i.e. each line contains an entry and a value separated by space.
+f = open("settings.txt")
+f.each {|i|
+	entry = i.split(/\s+/)
+	if 2 <= entry.size
+		Settings[entry[0]] = entry[1]
+	end
+}
+f.close
+
+host = Settings["host"]
+Urlbase = "http://" + host + "/"
+QueueFile = "queue.txt"
+
+Boundary = "123456789"
+c = HTTPClient.new
 
 # parse the settings file in the server.
 # temporarily disabled because it tend to fail so often
@@ -36,7 +48,7 @@ def upload(c, file, queue_fail)
 
 	# upload and print result
 	open(file) do |fl|
-#		print "Posting: " + Urlbase + Settings["uploader"]
+		print "Posting: " + Urlbase + Settings["uploader"] + "\n"
 		postdata = { "fl" => fl, "dir" => dir }
 		begin
 			resultString = c.post_content(Urlbase + Settings["uploader"], postdata,
@@ -67,6 +79,7 @@ end
 if upload(c, ARGV[0], true)
 
 	if File.exists?(QueueFile)
+		print "Re-trying upload failed files...\n"
 		open(QueueFile) do |qf|
 			que = qf.read()
 			que.split("\n").each do |i|
