@@ -28,7 +28,7 @@ try:
 	print("Saving " + outpath + "\n")
 
 	if not os.path.isdir(outdir):
-		mkdir(outdir)
+		os.mkdir(outdir)
 
 	cv.SaveImage(outpath, img)
 
