@@ -77,13 +77,22 @@ def upload(c, file, queue_fail)
 end
 
 if upload(c, ARGV[0], true)
+	exit
 
 	if File.exists?(QueueFile)
 		print "Re-trying upload failed files...\n"
 		open(QueueFile) do |qf|
 			que = qf.read()
+			count = 0
 			que.split("\n").each do |i|
-				upload(c, i, false)
+				if File.exists?(i)
+					if upload(c, i, false)
+						count += 1
+					end
+				end
+				if 2 < count
+					exit
+				end
 			end
 		end
 
