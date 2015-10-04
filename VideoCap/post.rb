@@ -21,6 +21,7 @@ f.close
 host = Settings["host"]
 Urlbase = "http://" + host + "/"
 QueueFile = "queue.txt"
+DelLog = "dellog.txt"
 
 Boundary = "123456789"
 c = HTTPClient.new
@@ -61,11 +62,17 @@ def upload(c, file, queue_fail)
 		end
 
 		if not succeeded
-			if queue_fail
-				open(QueueFile, mode_enc="a") do |fp|
-					fp.write(file + "\n")
-					print "Written failed file " + file + " to " + QueueFile + "\n"
-				end
+			if resultString.split("\n")[1] == "file already exists"
+				# Delete already uploaded file from the client, or the client will
+				# repeat trying to upload the same file forever.
+				File.delete(file)
+				ret = true
+			elsif queue_fail
+				# Queue file doesn't work well, so the functionality is frozen
+#				open(QueueFile, mode_enc="a") do |fp|
+#					fp.write(file + "\n")
+#					print "Written failed file " + file + " to " + QueueFile + "\n"
+#				end
 			end
 		else
 			File.delete(file)
@@ -76,7 +83,39 @@ def upload(c, file, queue_fail)
 	return ret
 end
 
+def retryPost(c)
+	# Find non-empty directory in the current directory and try to upload one of
+	# the directory's files.
+	Dir['*'].sort.select{ |d| File.directory? d } \
+		.select{ |d| !(Dir.entries(d) - %w[ . .. ]).empty? } \
+		.each{ |d|
+			print d, "\n"
+			Dir[d + "/*"].sort.each{|f|
+				print f, "\n"
+				if File.file? f
+					upload(c, f, false)
+					return
+				end
+			}
+		}
+end
+
+def deleteEmptyDirs()
+	# Find empty directories and delete them
+	Dir['*'].select{ |d| File.directory? d } \
+		.select{ |d| (Dir.entries(d) - %w[ . .. ]).empty? } \
+		.each{ |d|
+			Dir.rmdir d
+			open(DelLog, mode_enc="a") do |fp|
+				fp.write(d + "\n")
+			end
+			print d, "\n"
+	}
+end
+
 if upload(c, ARGV[0], true)
+	retryPost c
+	deleteEmptyDirs
 	exit
 
 	if File.exists?(QueueFile)
@@ -99,9 +138,5 @@ if upload(c, ARGV[0], true)
 		File.delete(QueueFile)
 	end
 
-#	Dir['**/*'].each {|f|
-#		if File.directory?(f)
-#		end
-#	}
 end
 
