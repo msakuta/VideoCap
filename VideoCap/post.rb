@@ -3,7 +3,8 @@ require 'httpclient'
 
 # default values
 Settings = {
-	"uploader" => "/html/fujilog/upload.php"
+	"uploader" => "/html/fujilog/upload.php",
+	"retries" => 2
 }
 
 # Parse the settings file in the local machine.
@@ -19,6 +20,7 @@ f.each {|i|
 f.close
 
 host = Settings["host"]
+Retries = Settings["retries"].to_i
 Urlbase = "http://" + host + "/"
 QueueFile = "queue.txt"
 DelLog = "dellog.txt"
@@ -114,7 +116,7 @@ def deleteEmptyDirs()
 end
 
 if upload(c, ARGV[0], true)
-	retryPost c
+	Retries.times { retryPost c }
 	deleteEmptyDirs
 	exit
 
